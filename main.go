@@ -33,11 +33,11 @@ func scan(ip string, p int) bool {
 func main() {
 
 	for i := 0; i < 36000; i++ {
-		resp := scan("@ip", i)
+		resp := scan("localhost", i)
 
 		if resp {
 
-			content, err := ioutil.ReadFile("ppt.json")
+			content, _ := ioutil.ReadFile("ppt.json")
 
 			var ports Ports
 			json.Unmarshal(content, &ports)
@@ -49,7 +49,15 @@ func main() {
 					fmt.Println("-------[ " + strconv.Itoa(i) + " ]-------")
 					fmt.Println("[nom]\t", ports.Ports[u].Name)
 					fmt.Println("[description]\t", ports.Ports[u].Description)
-					fmt.Println("---------------------\n")
+
+					if ports.Ports[u].Tcp {
+						fmt.Print("\n [  TCP  ]")
+					}
+					if ports.Ports[u].Udp {
+						fmt.Print(" [  UDP  ]")
+					}
+
+					fmt.Println("\n---------------------\n")
 
 					break
 				}
