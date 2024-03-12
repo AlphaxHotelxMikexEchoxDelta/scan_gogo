@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net"
 	"strconv"
 )
@@ -34,14 +33,11 @@ func scan(ip string, p int) bool {
 func main() {
 
 	for i := 0; i < 36000; i++ {
-		resp := scan("localhost", i)
+		resp := scan("@ip", i)
 
 		if resp {
 
 			content, err := ioutil.ReadFile("ppt.json")
-			if err != nil {
-				log.Fatal("Error when opening file: ", err)
-			}
 
 			var ports Ports
 			json.Unmarshal(content, &ports)
@@ -50,10 +46,10 @@ func main() {
 
 				if ports.Ports[u].Number == i {
 
-					fmt.Println("------- " + strconv.Itoa(i) + " -------")
+					fmt.Println("-------[ " + strconv.Itoa(i) + " ]-------")
 					fmt.Println("[nom]\t", ports.Ports[u].Name)
 					fmt.Println("[description]\t", ports.Ports[u].Description)
-					fmt.Println("-------------------\n")
+					fmt.Println("---------------------\n")
 
 					break
 				}
