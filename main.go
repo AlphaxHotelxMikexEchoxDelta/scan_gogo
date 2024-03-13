@@ -59,7 +59,7 @@ func scanner(ip string) {
 
 		if resp {
 
-			fmt.Println("\n[ " + strconv.Itoa(ports.Ports[i].Number) + " ]\t" + ports.Ports[i].Name)
+			fmt.Println("\n[ " + strconv.Itoa(ports.Ports[i].Number) + " ] " + ports.Ports[i].Name)
 			fmt.Println("--> ", ports.Ports[i].Description)
 
 			/*
