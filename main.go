@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net"
+	"os"
 	"strconv"
 )
 
@@ -13,11 +14,27 @@ type Ports struct {
 }
 
 type Data struct {
-	Number      int    `json:"number"`
-	Tcp         bool   `json:"tcp"`
-	Udp         bool   `json:"udp"`
+	Number int `json:"number"`
+	//Tcp         bool   `json:"tcp"`
+	//Udp         bool   `json:"udp"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
+}
+
+func banner(ip string) {
+
+	fmt.Println("     _________")
+	fmt.Println("    / ======= \\")
+	fmt.Println("   / __________\\")
+	fmt.Println("  | ___________ |")
+	fmt.Println("  | | -       | |    @ip_target: " + ip)
+	fmt.Println("  | | scan_go | |    by @BigBurgerBoy")
+	fmt.Println("  | |_________| |")
+	fmt.Println("  \\=____________/")
+	fmt.Println("  / ''''''''''''\\")
+	fmt.Println(" / ::::::::::::: \\")
+	fmt.Println("(_________________)\n")
+
 }
 
 func scan(ip string, p int) bool {
@@ -30,39 +47,47 @@ func scan(ip string, p int) bool {
 	return false
 }
 
-func main() {
+func scanner(ip string) {
 
-	for i := 0; i < 36000; i++ {
-		resp := scan("localhost", i)
+	content, _ := ioutil.ReadFile("ppt.json")
+	var ports Ports
+	json.Unmarshal(content, &ports)
+
+	for i := range ports.Ports {
+
+		resp := scan(ip, ports.Ports[i].Number)
 
 		if resp {
 
-			content, _ := ioutil.ReadFile("ppt.json")
+			fmt.Println("\n[ " + strconv.Itoa(ports.Ports[i].Number) + " ]\t" + ports.Ports[i].Name)
+			fmt.Println("--> ", ports.Ports[i].Description)
 
-			var ports Ports
-			json.Unmarshal(content, &ports)
-
-			for u := 0; u < len(ports.Ports); u++ {
-
-				if ports.Ports[u].Number == i {
-
-					fmt.Println("-------[ " + strconv.Itoa(i) + " ]-------")
-					fmt.Println("[nom]\t", ports.Ports[u].Name)
-					fmt.Println("[description]\t", ports.Ports[u].Description)
-
-					if ports.Ports[u].Tcp {
-						fmt.Print("\n [  TCP  ]")
-					}
-					if ports.Ports[u].Udp {
-						fmt.Print(" [  UDP  ]")
-					}
-
-					fmt.Println("\n---------------------\n")
-
-					break
+			/*
+				if ports.Ports[i].Tcp {
+					fmt.Print(" [  TCP  ]")
 				}
-			}
+				if ports.Ports[i].Udp {
+					fmt.Print(" [  UDP  ]")
+				}
+			*/
+
 		}
+
+	}
+}
+
+func main() {
+
+	if len(os.Args) != 1 {
+
+		ip := os.Args[1]
+
+		banner(ip)
+		scanner(ip)
+
+	} else {
+
+		fmt.Println("Veuillez indiquez une ip")
 
 	}
 
