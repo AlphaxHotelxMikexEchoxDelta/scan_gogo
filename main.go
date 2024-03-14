@@ -64,6 +64,7 @@ func run(ip string) {
 		}(i)
 	}
 	wg.Wait()
+
 }
 
 func main() {
