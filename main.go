@@ -7,6 +7,7 @@ import (
 	"net"
 	"os"
 	"strconv"
+	"sync"
 )
 
 type Ports struct {
@@ -37,58 +38,42 @@ func banner(ip string) {
 
 }
 
-func scan(ip string, p int) bool {
-	addr := ip + ":" + strconv.Itoa(p)
-	_, err_scan := net.Dial("tcp", addr)
-
-	if err_scan == nil {
-		return true
-	}
-	return false
-}
-
-func scanner(ip string) {
+func run(ip string) {
 
 	content, _ := ioutil.ReadFile("ppt.json")
 	var ports Ports
 	json.Unmarshal(content, &ports)
 
+	var wg sync.WaitGroup
+
 	for i := range ports.Ports {
 
-		resp := scan(ip, ports.Ports[i].Number)
+		wg.Add(1)
 
-		if resp {
+		go func(j int) {
+			defer wg.Done()
 
-			fmt.Println("\n[ " + strconv.Itoa(ports.Ports[i].Number) + " ] " + ports.Ports[i].Name)
-			fmt.Println("--> ", ports.Ports[i].Description)
+			conn, err_scan := net.Dial("tcp", ip+":"+strconv.Itoa(ports.Ports[j].Number))
 
-			/*
-				if ports.Ports[i].Tcp {
-					fmt.Print(" [  TCP  ]")
-				}
-				if ports.Ports[i].Udp {
-					fmt.Print(" [  UDP  ]")
-				}
-			*/
+			if err_scan == nil {
+				fmt.Println("\n[ " + strconv.Itoa(ports.Ports[j].Number) + " ] " + ports.Ports[j].Name)
+				fmt.Println("--> ", ports.Ports[j].Description)
+				conn.Close()
+			}
 
-		}
-
+		}(i)
 	}
+	wg.Wait()
 }
 
 func main() {
 
 	if len(os.Args) != 1 {
-
 		ip := os.Args[1]
-
 		banner(ip)
-		scanner(ip)
-
+		run(ip)
 	} else {
-
-		fmt.Println("Veuillez indiquez une ip")
-
+		fmt.Println("\nSaisi invalide !\n[ main.exe @ip_cible ]\n")
 	}
 
 }
