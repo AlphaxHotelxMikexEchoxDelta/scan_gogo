@@ -56,8 +56,7 @@ func run(ip string) {
 			conn, err_scan := net.Dial("tcp", ip+":"+strconv.Itoa(ports.Ports[j].Number))
 
 			if err_scan == nil {
-				fmt.Println("\n[ " + strconv.Itoa(ports.Ports[j].Number) + " ] " + ports.Ports[j].Name)
-				fmt.Println("--> ", ports.Ports[j].Description)
+				fmt.Println("\n[ "+strconv.Itoa(ports.Ports[j].Number)+" ] "+ports.Ports[j].Name+"\n--> ", ports.Ports[j].Description)
 				conn.Close()
 			}
 
