@@ -34,17 +34,17 @@ type Data struct {
 
 func banner(ip string) {
 
-	fmt.Println("     _________")
-	fmt.Println("    / ======= \\")
-	fmt.Println("   / __________\\")
-	fmt.Println("  | ___________ |")
-	fmt.Println("  | | -       | |    @ip_target: " + ip)
-	fmt.Println("  | | scan_go | |    by @BigBurgerBoy")
-	fmt.Println("  | |_________| |")
-	fmt.Println("  \\=____________/")
-	fmt.Println("  / ''''''''''''\\")
-	fmt.Println(" / ::::::::::::: \\")
-	fmt.Print("(_________________)\n")
+	fmt.Println("       _________")
+	fmt.Println("      / ======= \\")
+	fmt.Println("     / __________\\")
+	fmt.Println("    | ___________ |")
+	fmt.Println("    | | -       | |    @ip_target: " + ColorRed + ip + ColorReset)
+	fmt.Println("    | | " + ColorRed + "scan_go" + ColorReset + " | |    by @BigBurgerBoy")
+	fmt.Println("    | |_________| |")
+	fmt.Println("    \\=____________/")
+	fmt.Println("    / ''''''''''''\\")
+	fmt.Println("   / ::::::::::::: \\")
+	fmt.Print("  (_________________)\n")
 
 }
 
@@ -58,21 +58,21 @@ func scan(ip string) []string {
 
 	var wg sync.WaitGroup
 
-	for i := range ports.Ports {
+	for _, port := range ports.Ports {
 
 		wg.Add(1)
 
 		go func(j int) {
 			defer wg.Done()
 
-			conn, err_scan := net.Dial("tcp", ip+":"+strconv.Itoa(ports.Ports[j].Number))
+			conn, err_scan := net.Dial("tcp", ip+":"+strconv.Itoa(port.Number))
 
 			if err_scan == nil {
-				opens = append(opens, "   -- "+ColorBlue+strconv.Itoa(ports.Ports[j].Number)+ColorReset+":"+ColorReset+ColorBlue+ports.Ports[j].Name+ColorReset+" --   "+colorGrey+ports.Ports[j].Description+ColorReset+"\n")
+				opens = append(opens, "   -- "+ColorBlue+strconv.Itoa(port.Number)+ColorReset+":"+ColorReset+ColorBlue+port.Name+ColorReset+" --   "+colorGrey+port.Description+ColorReset+"\n")
 				conn.Close()
 			}
 
-		}(i)
+		}(port.Number)
 	}
 	wg.Wait()
 
@@ -96,7 +96,7 @@ func run(addr_reseaux string, min int, max int) map[string][]string {
 			open = scan(addr_reseaux + "." + strconv.Itoa(j))
 
 			if len(open) != 0 {
-				result[ColorReset+"\n  "+addr_reseaux+"."+strconv.Itoa(j)+"\t\t\t\t["+ColorGreen+"OK"+ColorReset+"]\n"] = open
+				result[ColorReset+"\n  "+addr_reseaux+"."+strconv.Itoa(j)+"\t\t\t\t["+ColorGreen+"UP"+ColorReset+"]\n"] = open[:]
 			}
 
 		}(i)
@@ -122,8 +122,11 @@ func main() {
 			max, _ := strconv.Atoi(limitesPlage[1])
 			resp := run(ip, min, max)
 
-			for key, ip := range resp {
-				fmt.Print(key, ip)
+			for ip, ports := range resp {
+				fmt.Print(ip)
+				for port := range ports {
+					fmt.Print(ports[port])
+				}
 			}
 
 		} else {
@@ -131,8 +134,11 @@ func main() {
 			max, _ := strconv.Atoi(limitesPlage[0])
 			resp := run(ip, min, max)
 
-			for key, ip := range resp {
-				fmt.Print(key, ip)
+			for ip, ports := range resp {
+				fmt.Print(ip)
+				for port := range ports {
+					fmt.Print(ports[port])
+				}
 			}
 
 		}
