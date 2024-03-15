@@ -40,6 +40,8 @@ func banner(ip string) {
 
 func run(ip string) {
 
+banner(ip)
+
 	content, _ := ioutil.ReadFile("ppt.json")
 	var ports Ports
 	json.Unmarshal(content, &ports)
@@ -69,11 +71,13 @@ func run(ip string) {
 func main() {
 
 	if len(os.Args) != 1 {
-		ip := os.Args[1]
-		banner(ip)
-		run(ip)
+
+		run(os.Args[1])
+
 	} else {
+
 		fmt.Println("\nSaisi invalide !\n[ main.exe @ip_cible ]\n")
+
 	}
 
 }
