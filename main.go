@@ -7,7 +7,17 @@ import (
 	"net"
 	"os"
 	"strconv"
+	"strings"
 	"sync"
+)
+
+const (
+	ColorReset  = "\033[0m"
+	ColorRed    = "\033[31m"
+	ColorGreen  = "\033[32m"
+	ColorBlue   = "\033[34m"
+	ColorPurple = "\033[35m"
+	colorGrey   = "\033[90m"
 )
 
 type Ports struct {
@@ -34,13 +44,13 @@ func banner(ip string) {
 	fmt.Println("  \\=____________/")
 	fmt.Println("  / ''''''''''''\\")
 	fmt.Println(" / ::::::::::::: \\")
-	fmt.Println("(_________________)\n")
+	fmt.Print("(_________________)\n")
 
 }
 
-func run(ip string) {
+func scan(ip string) []string {
 
-banner(ip)
+	var opens []string
 
 	content, _ := ioutil.ReadFile("ppt.json")
 	var ports Ports
@@ -58,7 +68,7 @@ banner(ip)
 			conn, err_scan := net.Dial("tcp", ip+":"+strconv.Itoa(ports.Ports[j].Number))
 
 			if err_scan == nil {
-				fmt.Println("\n[ "+strconv.Itoa(ports.Ports[j].Number)+" ] "+ports.Ports[j].Name+"\n--> ", ports.Ports[j].Description)
+				opens = append(opens, "   -- "+ColorBlue+strconv.Itoa(ports.Ports[j].Number)+ColorReset+":"+ColorReset+ColorBlue+ports.Ports[j].Name+ColorReset+" --   "+colorGrey+ports.Ports[j].Description+ColorReset+"\n")
 				conn.Close()
 			}
 
@@ -66,17 +76,70 @@ banner(ip)
 	}
 	wg.Wait()
 
+	return opens
+
+}
+
+func run(addr_reseaux string, min int, max int) map[string][]string {
+
+	var wg sync.WaitGroup
+	var open []string
+	result := make(map[string][]string)
+
+	for i := min; i < max+1; i++ {
+
+		wg.Add(1)
+
+		go func(j int) {
+			defer wg.Done()
+
+			open = scan(addr_reseaux + "." + strconv.Itoa(j))
+
+			if len(open) != 0 {
+				result[ColorReset+"\n  "+addr_reseaux+"."+strconv.Itoa(j)+"\t\t\t\t["+ColorGreen+"OK"+ColorReset+"]\n"] = open
+			}
+
+		}(i)
+	}
+	wg.Wait()
+
+	return result
 }
 
 func main() {
 
-	if len(os.Args) != 1 {
+	if len(os.Args[1:]) != 0 {
 
-		run(os.Args[1])
+		banner(os.Args[1])
+
+		plageIP := strings.Split(os.Args[1], ".")
+		limitesPlage := strings.Split(plageIP[len(plageIP)-1], "-")
+
+		ip := strings.Join(plageIP[:len(plageIP)-1], ".")
+
+		if len(limitesPlage) != 1 {
+			min, _ := strconv.Atoi(limitesPlage[0])
+			max, _ := strconv.Atoi(limitesPlage[1])
+			resp := run(ip, min, max)
+
+			for key, ip := range resp {
+				fmt.Print(key, ip)
+			}
+
+		} else {
+			min, _ := strconv.Atoi(limitesPlage[0])
+			max, _ := strconv.Atoi(limitesPlage[0])
+			resp := run(ip, min, max)
+
+			for key, ip := range resp {
+				fmt.Print(key, ip)
+			}
+
+		}
 
 	} else {
 
-		fmt.Println("\nSaisi invalide !\n[ main.exe @ip_cible ]\n")
+		fmt.Print(ColorRed + "\nSaisi invalide !" + ColorReset + "\n[ main.exe @ip_cible ]\n\n")
 
 	}
 
